@@ -28,7 +28,7 @@ public class IngredientsControllers {
     }
 
     //Продолжаем работать с приложением по рецептам.
-    // К уже созданной структуре добавьте операции редактирования и удаления рецептов и ингредиентов.
+    // К уже созданной структуре добавьте операции редактирования и удаления рецептов и ингредиентов .
     @PutMapping("/{count}")
     public IngredientsDTO editIngredients(@PathVariable int count, @RequestBody Ingredients ingredients) {
         IngredientsDTO ingredientsDTO = ingredientsImplServices.editIngredients(count, ingredients);

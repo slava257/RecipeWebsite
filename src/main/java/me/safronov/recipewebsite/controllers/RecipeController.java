@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/recipe")
-//Создайте контроллеры и API для создания и получения рецептов и ингредиентов.
+//Создайте контроллеры и API для создания и получения рецептов и ингредиентов .
 public class RecipeController {
     private final RecipeImplServices recipeImplServices;
 

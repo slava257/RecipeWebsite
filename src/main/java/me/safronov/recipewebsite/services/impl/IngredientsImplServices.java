@@ -29,7 +29,7 @@ public class IngredientsImplServices {
     }
 
     public IngredientsDTO editIngredients(int count, Ingredients ingredients) {
-        if (idIngredientsMap.containsKey(count)) {
+        if (idIngredientsMap.containsKey( count )) {
             idIngredientsMap.put(count, ingredients);
             return IngredientsDTO.form(count, ingredients);
         }

@@ -34,7 +34,7 @@ public class RecipeImplServices {
 
 
     public RecipeDTO addRecipe(Recipe recipe) {
-        recipes.put(count++, recipe);
+        recipes.put(count++, recipe );
         for (Ingredients ingredients : recipe.getIngredients()) {
             this.ingredientsImplServices.addIngredients(ingredients);
         }
