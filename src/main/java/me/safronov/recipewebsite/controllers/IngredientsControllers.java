@@ -39,10 +39,11 @@ public class IngredientsControllers {
     }
     @DeleteMapping("/{count}")
     public IngredientsDTO deleteIngredients(@PathVariable int count) {
-        if (ingredientsImplServices == null) {
+        IngredientsDTO ingredientsDTO = ingredientsImplServices.deleteIngredients(count);
+        if (ingredientsDTO == null) {
             throw new IngredientsNotFoundException();
         }
-        return ingredientsImplServices.deleteIngredients(count);
+        return ingredientsDTO;
     }
     @GetMapping()
     public List<IngredientsDTO> allGetIngredients() {

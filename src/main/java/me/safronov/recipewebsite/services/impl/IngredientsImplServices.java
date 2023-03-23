@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 public class IngredientsImplServices {
     private int idCount = 0;
-    Map<Integer, Ingredients> idIngredientsMap = new HashMap<>();
+    private final Map<Integer, Ingredients>  idIngredientsMap = new HashMap<>();
 
     public IngredientsDTO addIngredients(Ingredients ingredients) {
         idIngredientsMap.put(idCount++, ingredients);

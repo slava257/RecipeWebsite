@@ -46,7 +46,7 @@ public class RecipeController {
     public RecipeDTO deleteRecipe(@PathVariable int count) {
         RecipeDTO recipeDTO = recipeImplServices.deleteRecipe(count);
         if (recipeDTO != null) {
-            return recipeImplServices.deleteRecipe(count);
+            return recipeDTO;
         }
         throw new RecipeNotFoundException();
     }
