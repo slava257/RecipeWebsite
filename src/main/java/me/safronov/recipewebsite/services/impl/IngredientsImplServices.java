@@ -1,7 +1,9 @@
 package me.safronov.recipewebsite.services.impl;
 import me.safronov.recipewebsite.DTO.IngredientsDTO;
+import me.safronov.recipewebsite.exception.ValidationException.IngredientValidationException;
 import me.safronov.recipewebsite.exception.IngredientsNotFoundException;
 import me.safronov.recipewebsite.model.Ingredients;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,6 +18,9 @@ public class IngredientsImplServices {
     private final Map<Integer, Ingredients>  idIngredientsMap = new HashMap<>();
 
     public IngredientsDTO addIngredients(Ingredients ingredients) {
+        if (StringUtils.isBlank(ingredients.getName())) {
+            throw new IngredientValidationException();
+        }
         idIngredientsMap.put(idCount++, ingredients);
         return IngredientsDTO.form(idCount, ingredients);
     }
@@ -25,11 +30,14 @@ public class IngredientsImplServices {
         if (ingredients != null) {
             return IngredientsDTO.form(count, ingredients);
         }
-        return null;
+        throw new IngredientsNotFoundException();
     }
 
     public IngredientsDTO editIngredients(int count, Ingredients ingredients) {
         if (idIngredientsMap.containsKey( count )) {
+            if (StringUtils.isBlank(ingredients.getName())) {
+                throw new IngredientValidationException();
+            }
             idIngredientsMap.put(count, ingredients);
             return IngredientsDTO.form(count, ingredients);
         }

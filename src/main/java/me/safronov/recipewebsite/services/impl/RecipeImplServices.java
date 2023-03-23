@@ -4,8 +4,10 @@ package me.safronov.recipewebsite.services.impl;
 import me.safronov.recipewebsite.DTO.RecipeDTO;
 import me.safronov.recipewebsite.exception.IngredientsNotFoundException;
 import me.safronov.recipewebsite.exception.RecipeNotFoundException;
+import me.safronov.recipewebsite.exception.ValidationException.RecipeValidationException;
 import me.safronov.recipewebsite.model.Ingredients;
 import me.safronov.recipewebsite.model.Recipe;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 
@@ -34,6 +36,9 @@ public class RecipeImplServices {
 
 
     public RecipeDTO addRecipe(Recipe recipe) {
+        if (StringUtils.isBlank(recipe.getName())) {
+            throw new RecipeValidationException();
+        }
         recipes.put(count++, recipe );
         for (Ingredients ingredients : recipe.getIngredients()) {
             this.ingredientsImplServices.addIngredients(ingredients);
@@ -48,11 +53,14 @@ public class RecipeImplServices {
         if (recipe != null) {
             return RecipeDTO.from(count, recipe);
         }
-        return null;
+        throw new RecipeNotFoundException();
     }
 
     public RecipeDTO editRecipe(int count, Recipe recipe) {
         if (recipes.containsKey(count)) {
+            if (StringUtils.isBlank(recipe.getName())) {
+                throw new RecipeValidationException();
+            }
             recipes.put(count, recipe);
             return RecipeDTO.from(count, recipe);
         }
