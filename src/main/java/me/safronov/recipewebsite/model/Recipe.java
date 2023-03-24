@@ -2,6 +2,7 @@ package me.safronov.recipewebsite.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 ////Продолжим разрабатывать приложение для рецептов. Вам необходимо создать сервис, который будет хранить рецепты и возвращать рецепты по его идентификатору.
@@ -16,6 +17,7 @@ import java.util.List;
 ////Шаги приготовления в формате списка строк.
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Recipe {
     private String name;
     private int cookingTime;

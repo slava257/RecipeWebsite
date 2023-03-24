@@ -1,6 +1,10 @@
 package me.safronov.recipewebsite.services.impl;
 
 
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.safronov.recipewebsite.DTO.RecipeDTO;
 import me.safronov.recipewebsite.exception.IngredientsNotFoundException;
 import me.safronov.recipewebsite.exception.RecipeNotFoundException;
@@ -11,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -25,27 +31,37 @@ import java.util.*;
 //В сервисе должны быть методы для добавления нового ингредиента и получения его по идентификатору.
 // Можно делать по аналогии с сервисом рецептов.
 @Service
+
 public class RecipeImplServices {
     private int count = 0;
     private final IngredientsImplServices ingredientsImplServices;
-    private final Map<Integer, Recipe> recipes = new HashMap<>();
+    private Map<Integer, Recipe> recipes = new HashMap<>();
+    final private FilesServicesImpl filesServices;
 
-    public RecipeImplServices(IngredientsImplServices ingredientsImplServices) {
+    public RecipeImplServices(IngredientsImplServices ingredientsImplServices, FilesServicesImpl filesServices) {
         this.ingredientsImplServices = ingredientsImplServices;
+        this.filesServices = filesServices;
     }
+
+
+    @PostConstruct
+    private void init() {
+        readFormFile();
+    }
+
 
 
     public RecipeDTO addRecipe(Recipe recipe) {
         if (StringUtils.isBlank(recipe.getName())) {
             throw new RecipeValidationException();
         }
-        recipes.put(count++, recipe );
+        recipes.put(count++, recipe);
+        saveToFile();
         for (Ingredients ingredients : recipe.getIngredients()) {
             this.ingredientsImplServices.addIngredients(ingredients);
         }
         return RecipeDTO.from(count, recipe);
     }
-
 
 
     public RecipeDTO getRecipes(int count) {
@@ -62,6 +78,7 @@ public class RecipeImplServices {
                 throw new RecipeValidationException();
             }
             recipes.put(count, recipe);
+            saveToFile();
             return RecipeDTO.from(count, recipe);
         }
         throw new RecipeNotFoundException();
@@ -71,16 +88,40 @@ public class RecipeImplServices {
         Recipe recipe = recipes.get(count);
         if (recipes.containsKey(count)) {
             recipes.remove(count);
+            saveToFile();
             return RecipeDTO.from(count, recipe);
         }
         throw new IngredientsNotFoundException();
     }
+
     public List<RecipeDTO> allGetRecipes() {
-       List<RecipeDTO> result =new ArrayList<>();
-       for(Map.Entry<Integer,Recipe> entry : recipes.entrySet()){
-           result.add(RecipeDTO.from(entry.getKey(),entry.getValue()));
+        List<RecipeDTO> result = new ArrayList<>();
+        for (Map.Entry<Integer, Recipe> entry : recipes.entrySet()) {
+            result.add(RecipeDTO.from(entry.getKey(), entry.getValue()));
 
         }
         return result;
     }
+
+    private void saveToFile() {
+        try {
+            String json = new ObjectMapper().writeValueAsString(recipes);
+            filesServices.saveToFile(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void readFormFile() {
+        String json = filesServices.readFromFile();
+        try {
+            if (!StringUtils.isEmpty(json)) {
+                recipes = new ObjectMapper().readValue(json, new TypeReference<LinkedHashMap<Integer, Recipe>>() {
+                });
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
