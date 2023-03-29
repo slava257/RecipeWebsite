@@ -1,4 +1,5 @@
 package me.safronov.recipewebsite.services.impl;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.safronov.recipewebsite.DTO.IngredientsDTO;
@@ -7,17 +8,22 @@ import me.safronov.recipewebsite.exception.IngredientsNotFoundException;
 import me.safronov.recipewebsite.model.Ingredients;
 import me.safronov.recipewebsite.services.FilesIngredientsServicesImpl;
 import org.apache.commons.lang3.StringUtils;
+
+
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+
+
 import java.util.*;
 
 
 @Service
 public class IngredientsImplServices {
+
     private int idCount = 0;
-    private Map<Integer, Ingredients>  idIngredientsMap = new HashMap<>();
+    private Map<Integer, Ingredients> idIngredientsMap = new HashMap<>();
     private final FilesIngredientsServicesImpl filesIngredientsServices;
 
     public IngredientsImplServices(FilesIngredientsServicesImpl filesIngredientsServices) {
@@ -48,7 +54,7 @@ public class IngredientsImplServices {
     }
 
     public IngredientsDTO editIngredients(int count, Ingredients ingredients) {
-        if (idIngredientsMap.containsKey( count )) {
+        if (idIngredientsMap.containsKey(count)) {
             if (StringUtils.isBlank(ingredients.getName())) {
                 throw new IngredientValidationException();
             }
@@ -77,6 +83,7 @@ public class IngredientsImplServices {
         }
         return result;
     }
+
     private void saveToFile() {
         try {
             String json = new ObjectMapper().writeValueAsString(idIngredientsMap);
@@ -85,15 +92,18 @@ public class IngredientsImplServices {
             e.printStackTrace();
         }
     }
+
     public void readFormFile() {
         String json = filesIngredientsServices.readFromFile();
         try {
             if (!StringUtils.isEmpty(json)) {
                 idIngredientsMap = new ObjectMapper().readValue(json, new TypeReference<LinkedHashMap<Integer, Ingredients>>() {
                 });
+                filesIngredientsServices.cleanDataFile();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }

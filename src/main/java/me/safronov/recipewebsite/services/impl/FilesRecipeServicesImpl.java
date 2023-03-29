@@ -6,6 +6,7 @@ package me.safronov.recipewebsite.services.impl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,18 +22,20 @@ import java.nio.file.Path;
 //Описание этого шага можно найти в видеоуроке и шпаргалке к уроку.
 //Обработайте ошибки, которые могут возникнуть, — самостоятельно определите, какие это могут быть ошибки.
 @Service
-public class FilesServicesImpl {
-    @Value("${path.to.data.file}")
+
+public class FilesRecipeServicesImpl {
+    @Value("${path.to.recipe.file}")
     private String dataFilePath;
 
-    @Value("${name.of.data.file}")
+    @Value("${name.of.recipe.file}")
     private String dataFileName;
 
-    public void saveToFile(String json ) {
+    public void saveToFile(String json) {
         try {
             Files.createDirectories(Path.of(dataFilePath));
             Path path = Path.of(dataFilePath).resolve(dataFileName);
-            cleanDataFile(path, json);
+            Files.writeString(path,json);
+            cleanDataFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,17 +46,20 @@ public class FilesServicesImpl {
         try {
             return Files.readString(Path.of(dataFilePath, dataFileName));
         } catch (IOException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
-    private void cleanDataFile(Path path,String json)  {
+    public void cleanDataFile()  {
+
         try {
-            Files.deleteIfExists(path);
-            Files.createFile(path);
-            Files.writeString(path, json);
+            Files.deleteIfExists(Path.of(dataFilePath,dataFileName));
+            Files.createFile(Path.of(dataFilePath,dataFileName));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public File getRecipeFile(){
+        return new File(dataFilePath + "/" + dataFileName);
     }
 }

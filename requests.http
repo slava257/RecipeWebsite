@@ -1,0 +1,38 @@
+GET http://localhost:8080/recipe/0
+###
+POST http://localhost:8080/recipe
+Content-Type: application/json
+
+
+
+
+{
+  "name": "test2",
+  "cookingTime": 30,
+  "ingredients": [
+    {
+      "name": "test ingredients",
+      "quantity": 2,
+      "measuringUnit": "price"
+    }
+  ],
+  "cookingInstructions": [
+    "step 1",
+    "step 2",
+    "step 3"
+  ]
+}
+###
+POST http://localhost:8080/ingredients
+Content-Type: application/json
+
+
+
+
+  {
+    "name": "test ingredients 1 ",
+    "quantity": 2,
+    "measuringUnit": "price"
+  }
+###
+GET http://localhost:8080/ingredients/1

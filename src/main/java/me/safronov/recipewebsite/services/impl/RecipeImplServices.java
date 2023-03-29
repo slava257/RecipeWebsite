@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+
+
 import java.util.*;
 
 
@@ -35,12 +37,12 @@ import java.util.*;
 public class RecipeImplServices {
     private int count = 0;
     private final IngredientsImplServices ingredientsImplServices;
-    private Map<Integer, Recipe> recipes = new HashMap<>();
-    final private FilesServicesImpl filesServices;
+    private Map<Integer, Recipe> recipes = new LinkedHashMap<>();
+    final private FilesRecipeServicesImpl filesRecipeServices;
 
-    public RecipeImplServices(IngredientsImplServices ingredientsImplServices, FilesServicesImpl filesServices) {
+    public RecipeImplServices(IngredientsImplServices ingredientsImplServices, FilesRecipeServicesImpl filesRecipeServices) {
         this.ingredientsImplServices = ingredientsImplServices;
-        this.filesServices = filesServices;
+        this.filesRecipeServices = filesRecipeServices;
     }
 
 
@@ -106,22 +108,25 @@ public class RecipeImplServices {
     private void saveToFile() {
         try {
             String json = new ObjectMapper().writeValueAsString(recipes);
-            filesServices.saveToFile(json);
+            filesRecipeServices.saveToFile(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void readFormFile() {
-        String json = filesServices.readFromFile();
+        filesRecipeServices.cleanDataFile();
+        String json = filesRecipeServices.readFromFile();
         try {
             if (!StringUtils.isEmpty(json)) {
                 recipes = new ObjectMapper().readValue(json, new TypeReference<LinkedHashMap<Integer, Recipe>>() {
                 });
+                filesRecipeServices.cleanDataFile();
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
+
 
 }

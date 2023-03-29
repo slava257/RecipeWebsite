@@ -1,11 +1,20 @@
 package me.safronov.recipewebsite.services;
 
+
+
+
 import org.springframework.beans.factory.annotation.Value;
+
+
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+
+
 //Задание
 //Продолжим работать с проектом по книге рецептов. Вам необходимо настроить сохранение загруженных рецептов и добавленных ингредиентов в файлы.
 //Важно: сохранение загруженных рецептов и добавленных ингредиентов должно происходить в разные файлы.
@@ -19,17 +28,21 @@ import java.nio.file.Path;
 //Обработайте ошибки, которые могут возникнуть, — самостоятельно определите, какие это могут быть ошибки.
 @Service
 public class FilesIngredientsServicesImpl {
-    @Value("${path.to.data1.file}")
+    @Value("${path.to.ingredients.file}")
     private String dataFilePath;
 
-    @Value("${name.of.data1.file}")
+    @Value("${name.of.ingredients.file}")
     private String dataFileName;
+
+
+
 
     public void saveToFile(String json) {
         try {
             Files.createDirectories(Path.of(dataFilePath));
             Path path = Path.of(dataFilePath).resolve(dataFileName);
-            cleanDataFile(path, json);
+            Files.writeString(path,json);
+            cleanDataFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -44,14 +57,19 @@ public class FilesIngredientsServicesImpl {
         }
     }
 
-    private void cleanDataFile(Path path,String json)  {
+    public void cleanDataFile()  {
         try {
-            Files.deleteIfExists(path);
-            Files.createFile(path);
-            Files.writeString(path, json);
+            Files.deleteIfExists(Path.of(dataFilePath,dataFileName));
+            Files.createFile(Path.of(dataFilePath,dataFileName));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-}
+
+
+     public File getIngredientsFile(){
+     return new File(dataFilePath + "/" + dataFileName);
+     }
+    }
+
 
