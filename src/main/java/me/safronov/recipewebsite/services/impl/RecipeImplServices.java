@@ -5,20 +5,32 @@ package me.safronov.recipewebsite.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import me.safronov.recipewebsite.DTO.RecipeDTO;
 import me.safronov.recipewebsite.exception.IngredientsNotFoundException;
 import me.safronov.recipewebsite.exception.RecipeNotFoundException;
 import me.safronov.recipewebsite.exception.ValidationException.RecipeValidationException;
 import me.safronov.recipewebsite.model.Ingredients;
 import me.safronov.recipewebsite.model.Recipe;
+
 import org.apache.commons.lang3.StringUtils;
+
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+import java.io.*;
 
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 
@@ -37,20 +49,26 @@ import java.util.*;
 public class RecipeImplServices {
     private int count = 0;
     private final IngredientsImplServices ingredientsImplServices;
-    private Map<Integer, Recipe> recipes = new LinkedHashMap<>();
+    private HashMap<Integer, Recipe> recipes = new LinkedHashMap<>();
     final private FilesRecipeServicesImpl filesRecipeServices;
+
 
     public RecipeImplServices(IngredientsImplServices ingredientsImplServices, FilesRecipeServicesImpl filesRecipeServices) {
         this.ingredientsImplServices = ingredientsImplServices;
         this.filesRecipeServices = filesRecipeServices;
+
+
     }
 
 
     @PostConstruct
     private void init() {
-        readFormFile();
+        try {
+            readFormFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
 
 
     public RecipeDTO addRecipe(Recipe recipe) {
@@ -64,7 +82,6 @@ public class RecipeImplServices {
         }
         return RecipeDTO.from(count, recipe);
     }
-
 
     public RecipeDTO getRecipes(int count) {
         Recipe recipe = recipes.get(count);
@@ -107,21 +124,24 @@ public class RecipeImplServices {
 
     private void saveToFile() {
         try {
-            String json = new ObjectMapper().writeValueAsString(recipes);
+          DataFile dataFile = new DataFile(count,recipes);
+            String json = new ObjectMapper().writeValueAsString(dataFile);
             filesRecipeServices.saveToFile(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+
+
     public void readFormFile() {
-        filesRecipeServices.cleanDataFile();
         String json = filesRecipeServices.readFromFile();
         try {
             if (!StringUtils.isEmpty(json)) {
-                recipes = new ObjectMapper().readValue(json, new TypeReference<LinkedHashMap<Integer, Recipe>>() {
-                });
-                filesRecipeServices.cleanDataFile();
+              DataFile dataFile = new ObjectMapper().readValue(json, new TypeReference<>() {
+              });
+                count = dataFile.getCount();
+                recipes=dataFile.getRecipes();
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -129,4 +149,66 @@ public class RecipeImplServices {
     }
 
 
+    public Path creatAddFile() throws IOException {
+
+        Path path = filesRecipeServices.createTempFile("report");
+        try (Writer writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND)) {
+            for (Recipe recipe : recipes.values()) {
+                writer.append(recipe.getName())
+                        .append(": \n").append("Время приготовления:").append(String.valueOf(recipe.getCookingTime()))
+                        .append(" минут \n")
+                        .append("Ингредиенты:\n");
+                for (Ingredients ingredients : recipe.getIngredients()) {
+                    writer.append("\t%s-%d %s".formatted(ingredients.getName(), ingredients.getQuantity(),
+                                    ingredients.getMeasuringUnit()))
+                            .append("\n");
+
+
+                }
+                for (int i = 0; i < recipe.getCookingInstructions().size(); i++) {
+                    writer.append("%d.%s".formatted(i + 1, recipe.getCookingInstructions().get(i)))
+                            .append("\n");
+                }
+            }
+        }
+        return path;
+    }
+
+    public ResponseEntity<InputStreamResource> downloadRecipeFile1() throws FileNotFoundException {
+        File file = filesRecipeServices.getRecipeFile();
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(file.length())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment ; filename=\"Recipe.json\"")
+                .body(resource);
+    }
+
+    public ResponseEntity<Object> downloadFileTxtRecipe() throws IOException {
+        Path path = creatAddFile();
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(path.toFile()));
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_PLAIN)
+                .contentLength(Files.size(path))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment ; filename=\"report.txt\"")
+                .body(resource);
+    }
+
+    public void addRecipeFromInputStream(InputStream inputStream) throws IOException {
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            while (( reader.readLine()) != null) {
+
+               addRecipe(new Recipe());
+            }
+        }
+    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class DataFile {
+        private Integer count;
+        private HashMap<Integer, Recipe> recipes;
+    }
 }

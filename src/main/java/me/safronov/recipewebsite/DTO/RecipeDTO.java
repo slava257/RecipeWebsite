@@ -6,6 +6,7 @@ import lombok.Data;
 import me.safronov.recipewebsite.model.Ingredients;
 import me.safronov.recipewebsite.model.Recipe;
 
+
 import java.util.List;
 
 @Data
@@ -19,7 +20,9 @@ public class RecipeDTO {
     private final List<String> cookingInstructions;
 
 
+
     public static RecipeDTO from(int count, Recipe recipe) {
         return new RecipeDTO(count, recipe.getName(), recipe.getCookingTime(), recipe.getIngredients(),recipe.getCookingInstructions());
     }
+
 }

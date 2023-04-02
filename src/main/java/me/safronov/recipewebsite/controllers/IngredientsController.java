@@ -20,10 +20,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/ingredients")
 @Tag(name="Ингредиент", description = "Операции и другии эндопоинты для работы с ингредиентами" )
-public class IngredientsControllers {
+public class IngredientsController {
     private final IngredientsImplServices ingredientsImplServices;
 
-    public IngredientsControllers(IngredientsImplServices ingredientsImplServices) {
+    public IngredientsController(IngredientsImplServices ingredientsImplServices) {
         this.ingredientsImplServices = ingredientsImplServices;
     }
 
@@ -129,3 +129,4 @@ public class IngredientsControllers {
         return ingredientsImplServices.allGetIngredients();
     }
 }
+

@@ -1,1 +1,1 @@
-{"0":{"name":"string","cookingTime":0,"ingredients":[{"name":"string","quantity":0,"measuringUnit":"string"}],"cookingInstructions":["string"]}}
+{"idCount":6,"idIngredientsMap":{"0":{"name":"черника","quantity":500,"measuringUnit":"гр"},"1":{"name":"яблоко","quantity":2,"measuringUnit":"шт"},"2":{"name":"черника","quantity":500,"measuringUnit":"гр"},"3":{"name":"яблоко","quantity":2,"measuringUnit":"шт"},"4":{"name":"string","quantity":0,"measuringUnit":"string"},"5":{"name":"string","quantity":0,"measuringUnit":"string"}}}

@@ -18,4 +18,5 @@ public class IngredientsDTO {
     public static IngredientsDTO form(int count, Ingredients ingredients) {
         return new IngredientsDTO(count,ingredients.getName(),ingredients.getQuantity(),ingredients.getMeasuringUnit());
     }
+
 }

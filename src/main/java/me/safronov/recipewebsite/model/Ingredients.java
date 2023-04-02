@@ -17,4 +17,5 @@ public class Ingredients {
     private int quantity;
     private String measuringUnit;
 
+
 }

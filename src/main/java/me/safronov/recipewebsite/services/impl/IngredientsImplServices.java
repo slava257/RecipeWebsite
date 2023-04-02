@@ -2,10 +2,17 @@ package me.safronov.recipewebsite.services.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import me.safronov.recipewebsite.DTO.IngredientsDTO;
 import me.safronov.recipewebsite.exception.ValidationException.IngredientValidationException;
 import me.safronov.recipewebsite.exception.IngredientsNotFoundException;
 import me.safronov.recipewebsite.model.Ingredients;
+
+
+
 import me.safronov.recipewebsite.services.FilesIngredientsServicesImpl;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,24 +23,31 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 
+
 import java.util.*;
 
 
 @Service
 public class IngredientsImplServices {
 
-    private int idCount = 0;
-    private Map<Integer, Ingredients> idIngredientsMap = new HashMap<>();
+    private Integer idCount = 0;
+    private HashMap<Integer, Ingredients> idIngredientsMap = new HashMap<>();
     private final FilesIngredientsServicesImpl filesIngredientsServices;
 
-    public IngredientsImplServices(FilesIngredientsServicesImpl filesIngredientsServices) {
+
+    public IngredientsImplServices(FilesIngredientsServicesImpl filesIngredientsServices ) {
         this.filesIngredientsServices = filesIngredientsServices;
+
     }
 
 
     @PostConstruct
     private void init() {
-        readFormFile();
+        try {
+            readFormFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public IngredientsDTO addIngredients(Ingredients ingredients) {
@@ -86,7 +100,8 @@ public class IngredientsImplServices {
 
     private void saveToFile() {
         try {
-            String json = new ObjectMapper().writeValueAsString(idIngredientsMap);
+            DataFile dataFile = new DataFile(idCount,idIngredientsMap) ;
+            String json = new ObjectMapper().writeValueAsString(dataFile);
             filesIngredientsServices.saveToFile(json);
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,16 +109,24 @@ public class IngredientsImplServices {
     }
 
     public void readFormFile() {
-        String json = filesIngredientsServices.readFromFile();
         try {
+            String json = filesIngredientsServices.readFromFile();
             if (!StringUtils.isEmpty(json)) {
-                idIngredientsMap = new ObjectMapper().readValue(json, new TypeReference<LinkedHashMap<Integer, Ingredients>>() {
+                DataFile dataFile = new ObjectMapper().readValue(json, new TypeReference<>() {
                 });
-                filesIngredientsServices.cleanDataFile();
+                idCount = dataFile.getIdCount();
+                idIngredientsMap = dataFile.getIdIngredientsMap();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class DataFile {
+        private Integer idCount;
+        private HashMap<Integer, Ingredients> idIngredientsMap;
+    }
 }
+

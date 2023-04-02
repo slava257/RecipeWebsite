@@ -39,10 +39,10 @@ public class FilesIngredientsServicesImpl {
 
     public void saveToFile(String json) {
         try {
-            Files.createDirectories(Path.of(dataFilePath));
             Path path = Path.of(dataFilePath).resolve(dataFileName);
-            Files.writeString(path,json);
             cleanDataFile();
+            Files.createDirectories(Path.of(dataFilePath));
+            Files.writeString(path,json);
         } catch (IOException e) {
             e.printStackTrace();
         }
