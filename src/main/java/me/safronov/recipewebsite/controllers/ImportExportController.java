@@ -18,7 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.InputStreamResource;
 
 
-
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +114,12 @@ public class ImportExportController {
             if (Files.size(path) == 0) {
                 return ResponseEntity.noContent().build();
             }
-            return recipeImplServices.downloadFileTxtRecipe();
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(path.toFile()));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .contentLength(Files.size(path))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment ; filename=\"report.txt\"")
+                    .body(resource);
 
         } catch (IOException e) {
             e.printStackTrace();

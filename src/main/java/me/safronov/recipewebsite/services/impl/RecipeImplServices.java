@@ -184,15 +184,6 @@ public class RecipeImplServices {
                 .body(resource);
     }
 
-    public ResponseEntity<Object> downloadFileTxtRecipe() throws IOException {
-        Path path = creatAddFile();
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(path.toFile()));
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_PLAIN)
-                .contentLength(Files.size(path))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment ; filename=\"report.txt\"")
-                .body(resource);
-    }
 
     public void addRecipeFromInputStream(InputStream inputStream) throws IOException {
 
